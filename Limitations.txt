@@ -1,0 +1,7 @@
+-Cannot view more than 5 videos concurrently.
+-Some video formats supported by quicktime are unsupported.
+-Waveform rendering is slow.
+-Waveform rendering does not work for all movies.
+
+-there is a known bug if you try to mark more than one ranged event simultaneously
+-not especially resistant to corrupt log files

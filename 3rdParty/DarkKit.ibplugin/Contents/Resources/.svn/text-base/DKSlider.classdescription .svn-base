@@ -1,0 +1,6 @@
+{
+	Actions = { };
+	Outlets = { };
+    ClassName = DKSlider; 
+    SuperClass = NSSlider; 
+}
