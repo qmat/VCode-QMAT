@@ -13,22 +13,40 @@
 
 @implementation ClickResult
 
-- (id)initWithEvent:(Event *)event atPart:(int)part{
-     if (self) {
-		 clickedEvent = [event retain];
-		 clickedPart = part;
+- (id)initWithEvent:(Event *)event atPart:(int)part withPrevious:(Event *)pEvent andNext:(Event *)nEvent{
+    if (self) {
+        clickedEvent = [event retain];
+        clickedPart = part;
+        
+        prevEvent = [pEvent retain];
+        nextEvent = [nEvent retain];
     }
     return self;
 }
 
+- (id)initWithEvent:(Event *)event atPart:(int)part{
+
+    return [self initWithEvent:event atPart:part withPrevious:nil andNext:nil];
+}
+
 - (void)dealloc{
 	[clickedEvent release];
+    [prevEvent release];
+    [nextEvent release];
 	[super dealloc];
 }
 
 - (Event *)clickedEvent{
 	return clickedEvent;
 }
+- (Event *)prevEvent{
+	return prevEvent;
+}
+- (Event *)nextEvent{
+	return nextEvent;
+}
+
+
 - (int)clickedPart{
 	return clickedPart;
 }

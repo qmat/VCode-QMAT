@@ -32,6 +32,8 @@
 - (Event *) eventAtTime:(unsigned long long)time;
 - (Event *) eventEndingAtTime:(unsigned long long)time;
 - (Event *) eventInMiddleAtTime:(unsigned long long)time;
+- (Event *) eventPreviousToEvent:(Event *)event;
+- (Event *) eventSubsequentToEvent:(Event *)event;
 
 - (NSArray *) eventList;
 

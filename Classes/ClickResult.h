@@ -20,9 +20,15 @@
 	
 	Event * clickedEvent;
 	int clickedPart;
+    
+    Event * prevEvent;
+    Event * nextEvent;
 }
+- (id)initWithEvent:(Event *)event atPart:(int)part withPrevious:(Event *)pEvent andNext:(Event *)nEvent;
 - (id)initWithEvent:(Event *)event atPart:(int)part;
 - (Event *)clickedEvent;
+- (Event *)prevEvent;
+- (Event *)nextEvent;
 - (int)clickedPart;
 
 @end

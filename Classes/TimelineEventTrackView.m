@@ -20,7 +20,7 @@
 - (id)initWithFrame:(NSRect)frame {
     self = [super initWithFrame:frame];
     if (self) {
-		thisEvent = nil;
+		clickResult = nil;
 		currentOffset = 0.0;
 		myTracks = [[[NSMutableArray alloc] initWithCapacity:5] retain];
 		nominalTrackHeight = [self frame].size.height;
@@ -198,63 +198,93 @@
 
 - (void)mouseDown:(NSEvent *)theEvent {
 	NSPoint curPoint = [self convertPoint:[theEvent locationInWindow] fromView:nil];
-	Event * clickedTimelineEvent = nil;
-	ClickResult * clickedObject = [self eventAtX:(curPoint.x) y:(curPoint.y)];
-	if(clickedObject != nil){
-		clickedTimelineEvent = [clickedObject clickedEvent];
-	}else{//else jump to this time.
-		[[doc playbackController] moveToPercent:((float)(curPoint.x) / (float)[self bounds].size.width)];
-	}
-
-	if (([theEvent clickCount] > 1)) {
-		if(clickedTimelineEvent){
-			[[doc eventfulController] editEventComment: clickedTimelineEvent];
-		}
-    }
+	clickResult = [self eventAtX:(curPoint.x) y:(curPoint.y)];
 	
-	if ([theEvent modifierFlags] & NSAlternateKeyMask) {
-		//find event in tree, delete it!
-		if(clickedTimelineEvent){
-			[[doc eventfulController] destroyEvent: clickedTimelineEvent];
-			thisEvent = nil;
-		}
-	}else{
-		if(clickedTimelineEvent){
-			thisEvent = clickedTimelineEvent;
-			thisEventPart = [clickedObject clickedPart];
-			currentOffset = curPoint.x - [self millisecondsToX:[clickedTimelineEvent startTime]];
-			currentTailOffset = curPoint.x - [self millisecondsToX:([clickedTimelineEvent startTime] + [clickedTimelineEvent duration])];
-		}else{
-			thisEvent = nil;
-			thisEventPart = 0;
-			currentOffset = curPoint.x;
-			currentTailOffset = 0;
-			playHeadTime = [doc playheadTime];
-		}
-
-
+    if(clickResult == nil)
+    {
+		// jump to this time.
+		[[doc playbackController] moveToPercent:((float)(curPoint.x) / (float)[self bounds].size.width)];
+        
+        currentOffset = curPoint.x;
+        currentTailOffset = 0;
+        playHeadTime = [doc playheadTime];
 	}
-
+    else
+    {
+        if (([theEvent clickCount] > 1))
+        {
+            // Edit event's comment
+            [[doc eventfulController] editEventComment: [clickResult clickedEvent]];
+        }
+        else if ([theEvent modifierFlags] & NSAlternateKeyMask)
+        {
+            // Delete event
+            [[doc eventfulController] destroyEvent: [clickResult clickedEvent]];
+            clickResult = nil;
+        }
+        else
+        {
+            currentOffset = curPoint.x - [self millisecondsToX:[[clickResult clickedEvent] startTime]];
+            currentTailOffset = curPoint.x - [self millisecondsToX:([[clickResult clickedEvent] startTime] + [[clickResult clickedEvent] duration])];
+            [clickResult retain];
+        }
+    }
 }
-- (void)mouseDragged:(NSEvent *)theEvent {
-	NSPoint curPoint = [self convertPoint:[theEvent locationInWindow] fromView:nil];
-	if(thisEvent){
-		if([thisEvent duration] != 0){
-			if(thisEventPart == EVENTHEAD){
-				unsigned long long difference = [self xToMilliseconds:(curPoint.x - currentOffset)] - [thisEvent startTime];
-				[thisEvent setStartTime:[self xToMilliseconds:(curPoint.x - currentOffset)]];
-				[thisEvent setDuration:([thisEvent duration] - difference)];
-				
-			}else if(thisEventPart == EVENTINTERIM){
-				[thisEvent setStartTime:[self xToMilliseconds:(curPoint.x - currentOffset)]];
-			}else if(thisEventPart == EVENTTAIL){
-				unsigned long long difference = [self xToMilliseconds:(curPoint.x - currentTailOffset)] - [thisEvent startTime];
-				[thisEvent setDuration:difference];
 
-			}
-		}else{
-			[thisEvent setStartTime:[self xToMilliseconds:(curPoint.x - currentOffset)]];
-		}
+- (void)mouseDragged:(NSEvent *)theEvent
+{
+	NSPoint curPoint = [self convertPoint:[theEvent locationInWindow] fromView:nil];
+	if(clickResult)
+    {
+        Event * thisEvent = [clickResult clickedEvent];
+        BOOL ranged = [thisEvent duration] != 0;
+        unsigned long long headTime = [self xToMilliseconds:curPoint.x - currentOffset];
+        unsigned long long tailTime = [self xToMilliseconds:curPoint.x - currentTailOffset];
+        unsigned long long leftBound = 0;
+        unsigned long long rightBound = 0;
+        unsigned long long difference = 0;
+        
+        switch ([clickResult clickedPart]) {
+            case EVENTHEAD:
+                leftBound = [[clickResult prevEvent] startTime] + [[clickResult prevEvent] duration];
+                if (headTime < leftBound) return;
+                
+                rightBound = ranged ? [thisEvent startTime] + [thisEvent duration] : [[clickResult nextEvent] startTime];
+                if (headTime >= rightBound && rightBound != 0) return;
+                
+                if (ranged)
+                {
+                    difference = headTime - [thisEvent startTime];
+                    [thisEvent setDuration:([thisEvent duration] - difference)];
+                }
+                
+                [thisEvent setStartTime:headTime];
+                
+                break;
+                
+            case EVENTINTERIM:
+                leftBound = [[clickResult prevEvent] startTime] + [[clickResult prevEvent] duration];
+                if (headTime < leftBound) return;
+                
+                rightBound = [[clickResult nextEvent] startTime];
+                if (tailTime >= rightBound && rightBound > 0) return;
+                
+                [thisEvent setStartTime:headTime];
+                
+                break;
+                
+            case EVENTTAIL:
+                leftBound = [thisEvent startTime] + 1;
+                if (tailTime < leftBound) return;
+                
+                rightBound = [[clickResult nextEvent] startTime];
+                if (tailTime >= rightBound && rightBound != 0) return;
+                
+                difference = tailTime - [thisEvent startTime];
+				[thisEvent setDuration:difference];
+                
+                break;
+        }
 	}
 	/*
 	else{
@@ -276,9 +306,12 @@
 	[self setNeedsDisplay:YES];
 }
 
-- (void)mouseUp:(NSEvent *)theEvent {
-	if(thisEvent){
-		thisEvent = nil;
+- (void)mouseUp:(NSEvent *)theEvent
+{
+	if(clickResult)
+    {
+        [clickResult release];
+		clickResult = nil;
 	}
 }
 
@@ -330,10 +363,15 @@
 
 	NSArray * array;
 	Event * event;
-	for(int i=0; i<[trackEventArrays count]; i++){
-		array = [trackEventArrays objectAtIndex:([trackEventArrays count]-i-1)];
-		for(int j = 0; j<[array count]; j++){
-			event = [array objectAtIndex:([array count]-j-1)];
+	for(int i=0; i<[trackEventArrays count]; i++)
+    {
+        int trackIndex = [trackEventArrays count]-i-1;
+		array = [trackEventArrays objectAtIndex: trackIndex];
+		
+        for(int j = 0; j<[array count]; j++)
+        {
+            int eventIndex = [array count]-j-1;
+			event = [array objectAtIndex:eventIndex];
 			float eventx;
 			float relativeXFromEventOrigin;
 			float relativeYFromEventOrigin;
@@ -346,8 +384,10 @@
 					relativeYFromEventOrigin = nominalTrackHeight-relativeYFromEventOrigin;
 				}
 			   
-				if(relativeYFromEventOrigin>=relativeXFromEventOrigin){
-					return [[[ClickResult alloc] initWithEvent:event atPart:EVENTTAIL] autorelease];
+				if(relativeYFromEventOrigin>=relativeXFromEventOrigin)
+                {
+                    EventTrack* eventTrack = [[self managedTracks] objectAtIndex:trackIndex];
+					return [[[ClickResult alloc] initWithEvent:event atPart:EVENTTAIL withPrevious:[eventTrack eventPreviousToEvent:event] andNext:[eventTrack eventSubsequentToEvent:event]] autorelease];
 				}
 				
 				//check for interim
@@ -359,8 +399,10 @@
 				   relativeYFromEventOrigin <= ((float)nominalTrackHeight * 3.0)/4 &&
 				   relativeXFromEventOrigin >= ((float)nominalTrackHeight/2) &&
 				   relativeXFromEventOrigin <= [event duration] - ((float)nominalTrackHeight/2)
-					){
-					return [[[ClickResult alloc] initWithEvent:event atPart:EVENTINTERIM] autorelease];
+				  )
+                {
+                    EventTrack* eventTrack = [[self managedTracks] objectAtIndex:trackIndex];
+					return [[[ClickResult alloc] initWithEvent:event atPart:EVENTINTERIM withPrevious:[eventTrack eventPreviousToEvent:event] andNext:[eventTrack eventSubsequentToEvent:event]] autorelease];
 				}
 			}
 			
@@ -373,7 +415,8 @@
 			}
 			
 			if(relativeYFromEventOrigin>=relativeXFromEventOrigin){
-				return [[[ClickResult alloc] initWithEvent:event atPart:EVENTHEAD] autorelease];
+                EventTrack* eventTrack = [[self managedTracks] objectAtIndex:trackIndex];
+				return [[[ClickResult alloc] initWithEvent:event atPart:EVENTHEAD withPrevious:[eventTrack eventPreviousToEvent:event] andNext:[eventTrack eventSubsequentToEvent:event]] autorelease];
 			}
 		}
 	}

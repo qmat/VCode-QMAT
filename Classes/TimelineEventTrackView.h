@@ -20,8 +20,7 @@
 	id doc; //CodingDocument
 	NSMutableArray *myTracks;
 	float nominalTrackHeight;
-	Event * thisEvent;
-	int thisEventPart;
+	ClickResult * clickResult;
 	float currentOffset;
 	float currentTailOffset;
 	unsigned long long playHeadTime;

@@ -80,8 +80,12 @@
 }
 
 //evt isn't copied; just inserted; is this wrong?
-- (void) addEvent: (Event *)evt{
+- (void) addEvent: (Event *)evt
+{
 	[events insertObject:evt atIndex:[events count]];
+    
+    [events sortedArrayUsingSelector:@selector(sortComparator:)];
+    
 	[[self undoManager] registerUndoWithTarget:self selector:@selector(removeEvent:) object:evt];
 	[[self undoManager] setActionName:@"Mark"];
 }
@@ -161,6 +165,34 @@
 		}
 	}
 	return nil;
+}
+
+// Return event previous to supplied event.
+// By start time.
+// Returns nil if event isn't found or is the first.
+// Relies on [events] being sorted
+- (Event *) eventPreviousToEvent:(Event *)event
+{
+    int indexOfEvent = [events indexOfObject:event];
+    
+    if (indexOfEvent == NSNotFound) return nil;
+    if (indexOfEvent == 0) return nil;
+    
+    return [events objectAtIndex:indexOfEvent - 1];
+}
+
+// Return event previous to supplied event.
+// By start time.
+// Returns nil if event isn't found or is the last.
+// Relies on [events] being sorted
+- (Event *) eventSubsequentToEvent:(Event *)event
+{
+    int indexOfEvent = [events indexOfObject:event];
+    
+    if (indexOfEvent == NSNotFound) return nil;
+    if (indexOfEvent == [events count] - 1) return nil;
+    
+    return [events objectAtIndex:indexOfEvent + 1];
 }
 
 
