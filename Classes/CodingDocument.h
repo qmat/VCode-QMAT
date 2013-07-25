@@ -55,6 +55,9 @@
 -(IBAction) toggleAdminWindow:(id)sender;
 -(IBAction) exportEventTextFile:(id)sender;
 
+- (IBAction) tbzAddConsecutiveEventNow:(id)sender;
+- (IBAction) tbzSetConsecutiveEventComment:(id)sender;
+
 - (NSString *) representedFilename;
 
 

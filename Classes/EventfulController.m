@@ -64,9 +64,8 @@
 
 
 - (IBAction) addEventNow:(id)sender{
-	EventTrack *activeTrack;
-	activeTrack = [[doc eventTracks] objectAtIndex:([sender tag]-1)];
-	[self addEventToTrack:activeTrack];
+	tbzActiveTrack = [[doc eventTracks] objectAtIndex:([sender tag]-1)];
+	[self addEventToTrack:tbzActiveTrack];
 	
 	[indexCustomView setNeedsDisplay:YES];
 	[timelineController updateTimeline];
@@ -98,6 +97,28 @@
 	
 	return;
 }
+
+- (void) tbzAddConsecutiveEventNow
+{
+    if (!tbzActiveTrack) return;
+    
+	tbzConsecutiveEvent = [self addEventToTrack:tbzActiveTrack];
+	
+    // If we got no event back, then it turned out to be the closing of a range. So create a new event now.
+    if (!tbzConsecutiveEvent)
+    {
+        tbzConsecutiveEvent = [self addEventToTrack:tbzActiveTrack];
+    }
+    
+	[indexCustomView setNeedsDisplay:YES];
+	[timelineController updateTimeline];
+}
+
+- (void) tbzSetConsecutiveEventComment:(NSString*)comment
+{
+    [tbzConsecutiveEvent setComment:comment];
+}
+
 
 //check if the sender was OK or Cancel
 //if it was OK, do all the event stuff, if not just don't do anything

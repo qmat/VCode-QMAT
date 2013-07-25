@@ -74,7 +74,6 @@ pascal Boolean MyActionFilter (MovieController mc, short action, void* params, l
 	[timelineController sizeToMovie];
 	[timelineController updateTimeline];
 	[docController updateGUI];
-
 }
 
 - (NSData *)dataRepresentationOfType:(NSString *)aType
@@ -615,6 +614,18 @@ pascal Boolean MyActionFilter (MovieController mc, short action, void* params, l
 		[self updateChangeCount:NSChangeDone];
 	}
 }
+
+
+- (IBAction) tbzAddConsecutiveEventNow:(id)sender
+{
+    [myController tbzAddConsecutiveEventNow];
+}
+
+- (IBAction) tbzSetConsecutiveEventComment:(id)sender
+{
+    [myController tbzSetConsecutiveEventComment:[sender title]];
+}
+
 
 
 - (void)addEventTrack:(EventTrack *)evtTrk{
