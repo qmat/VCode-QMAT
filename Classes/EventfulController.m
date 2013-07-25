@@ -101,13 +101,15 @@
 - (void) tbzAddConsecutiveEventNow
 {
     if (!tbzActiveTrack) return;
+
+    unsigned long long now = [doc playheadTime];
     
-	tbzConsecutiveEvent = [self addEventToTrack:tbzActiveTrack];
+	tbzConsecutiveEvent = [self addEventToTrack:tbzActiveTrack atTime:now];
 	
     // If we got no event back, then it turned out to be the closing of a range. So create a new event now.
     if (!tbzConsecutiveEvent)
     {
-        tbzConsecutiveEvent = [self addEventToTrack:tbzActiveTrack];
+        tbzConsecutiveEvent = [self addEventToTrack:tbzActiveTrack atTime:now];
     }
     
 	[indexCustomView setNeedsDisplay:YES];
@@ -193,13 +195,17 @@
 
 
 //returns event if it was added; otherwise returns nil.
-- (Event *) addEventToTrack:(EventTrack *)activeTrack{
+- (Event *) addEventToTrack:(EventTrack *)activeTrack
+{
+    return [self addEventToTrack:activeTrack atTime:[doc playheadTime]];
+}
+
+- (Event *) addEventToTrack:(EventTrack *)activeTrack atTime:(unsigned long long)time;
+{
 	NSArray * recordingEvents;
 	Event *newEvent = Nil;
-	unsigned long long now;
-	now = [doc playheadTime];
 	
-	if([activeTrack eventAtTime:now] == nil){
+	if([activeTrack eventAtTime:time] == nil){
 	
 		//Check if there is an event in activeTrack
 		
@@ -207,7 +213,7 @@
 			recordingEvents = [doc recordingEvents];
 			if(![self array:recordingEvents containsEventOnTrack:activeTrack]){//This should check if there is no recording event on this track...
 				//create new event and start recording
-				newEvent = [[Event alloc] initInstantEventAtTime:now];
+				newEvent = [[Event alloc] initInstantEventAtTime:time];
 				[doc addRecordingEvent:newEvent];
 				[activeTrack addEvent:newEvent];
 			}else{
@@ -219,7 +225,7 @@
 				}
 			}
 		}else{//instantaneous event
-			newEvent = [[Event alloc] initInstantEventAtTime:now];
+			newEvent = [[Event alloc] initInstantEventAtTime:time];
 			[activeTrack addEvent:newEvent];
 		}
 		[doc updateChangeCount:NSChangeDone];
