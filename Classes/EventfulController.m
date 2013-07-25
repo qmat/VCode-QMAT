@@ -118,6 +118,8 @@
 
 - (void) tbzSetConsecutiveEventComment:(NSString*)comment
 {
+    if (!tbzConsecutiveEvent) return;
+    
     [tbzConsecutiveEvent setComment:comment];
 }
 

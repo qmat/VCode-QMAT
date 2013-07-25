@@ -57,17 +57,18 @@
 			currentEvent = [currentEventArray objectAtIndex:j];
 			milliseconds = [currentEvent startTime];
 			duration = [currentEvent duration];
-			if([[currentEvent comment] length] > 0){
-				hasComment = YES;
-			}else{
-				hasComment = NO;
+            
+            if([currentEvent comment] && [[currentEvent comment] length] == 0)
+            {
+				NSLog(@"comment exists but length is zero");
 			}
+            
 			[self drawChevronAtMS:milliseconds withColor:[currentTrack trackColor] andRow:([myTracks count] -i -1) invertedBorder:hasComment withLabel:[currentTrack key]];
 			
 			//if the track is !instantaneous AND event duration >0 then 
 			if((![currentTrack instantaneousMode]) && (duration > 0)){
-				[self drawChevronAtMS:(milliseconds+duration) withColor:[currentTrack trackColor] invertedBorder:hasComment withLabel:[currentTrack key]];
-				[self drawFillFromMS:(milliseconds) toMS:(milliseconds+duration) withColor:[currentTrack trackColor] invertedBorder:hasComment];
+				[self drawChevronAtMS:(milliseconds+duration) withColor:[currentTrack trackColor] invertedBorder:NO withLabel:[currentTrack key]];
+                [self drawFillFromMS:milliseconds toMS:milliseconds+duration fillColor:[currentTrack trackColor] strokeColor:[NSColor whiteColor] label:[currentEvent comment]];
 			}
 		}
 	}
@@ -75,11 +76,18 @@
 	[self drawPlayHead];
 }
 
-- (void)drawFillFromMS:(unsigned long long)start toMS:(unsigned long long)end withColor:(NSColor*)color{
-	[self drawFillFromMS:(start) toMS:(end) withColor:color invertedBorder:NO];
+- (void)drawFillFromMS:(unsigned long long)start toMS:(unsigned long long)end withColor:(NSColor*)color
+{
+	[self drawFillFromMS:(start) toMS:(end) fillColor:color strokeColor:[NSColor whiteColor] label:nil];
 }
 
-- (void)drawFillFromMS:(unsigned long long)start toMS:(unsigned long long)end withColor:(NSColor*)color invertedBorder:(BOOL)inverted{
+- (void)drawFillFromMS:(unsigned long long)start toMS:(unsigned long long)end withColor:(NSColor*)color invertedBorder:(BOOL)inverted
+{
+    [self drawFillFromMS:start toMS:end fillColor:color strokeColor:inverted ? [NSColor blackColor] : [NSColor whiteColor] label:nil];
+}
+
+- (void)drawFillFromMS:(unsigned long long)start toMS:(unsigned long long)end fillColor:(NSColor*)fillColor strokeColor:(NSColor*)strokeColor label:(NSString*)label
+{
 	float startX = 0.0;
 	float endX = 0.0;
 	float viewHeight = [self bounds].size.height;
@@ -87,13 +95,8 @@
 	startX = [self millisecondsToX:start];
 	endX = [self millisecondsToX:end];
 	
-	[color setFill];
-	if(inverted){
-		[[NSColor blackColor] setStroke];
-	}else{
-		[[NSColor whiteColor] setStroke];
-	}
-
+	[fillColor setFill];
+    [strokeColor setStroke];
 	
 	//NSRect fillRect = NSMakeRect(startX,(0.25*viewHeight),(endX-startX),(0.5*viewHeight));
 	//NSRectFill(fillRect);
@@ -121,6 +124,12 @@
 	[strokePath closePath];
     [strokePath stroke];
 	
+    if (label)
+    {
+        NSRect textBounds = NSMakeRect(startX, 0.25*viewHeight, endX-startX, 0.5*viewHeight);
+        [label drawInRect:textBounds withAttributes:[NSDictionary dictionaryWithObjectsAndKeys:[NSColor whiteColor], NSForegroundColorAttributeName, nil]];
+    }
+    
 	return;
 }
 
