@@ -36,10 +36,10 @@
 }
 
 
-- (void)drawRect:(NSRect)rect {	
+- (void)drawRect:(NSRect)dirtyRect {
 	//White Background
 	[[NSColor colorWithDeviceWhite:0.75 alpha:1] set];
-	[NSBezierPath fillRect:[self bounds]];
+	[NSBezierPath fillRect:dirtyRect];
 
 
 	Event * currentEvent;
@@ -58,18 +58,17 @@
 			milliseconds = [currentEvent startTime];
 			duration = [currentEvent duration];
             
-            if([currentEvent comment] && [[currentEvent comment] length] == 0)
+            // Only draw if we're in the dirty rect
+            if (NSIntersectsRect(NSMakeRect([self millisecondsToX:milliseconds], 0, [self millisecondsToX:duration], [self bounds].size.height), dirtyRect))
             {
-				NSLog(@"comment exists but length is zero");
-			}
-            
-			[self drawChevronAtMS:milliseconds withColor:[currentTrack trackColor] andRow:([myTracks count] -i -1) invertedBorder:hasComment withLabel:[currentTrack key]];
-			
-			//if the track is !instantaneous AND event duration >0 then 
-			if((![currentTrack instantaneousMode]) && (duration > 0)){
-				[self drawChevronAtMS:(milliseconds+duration) withColor:[currentTrack trackColor] invertedBorder:NO withLabel:[currentTrack key]];
-                [self drawFillFromMS:milliseconds toMS:milliseconds+duration fillColor:[currentTrack trackColor] strokeColor:[NSColor whiteColor] label:[currentEvent comment]];
-			}
+                [self drawChevronAtMS:milliseconds withColor:[currentTrack trackColor] andRow:([myTracks count] -i -1) invertedBorder:hasComment withLabel:[currentTrack key]];
+                
+                //if the track is !instantaneous AND event duration >0 then 
+                if((![currentTrack instantaneousMode]) && (duration > 0)){
+                    [self drawChevronAtMS:(milliseconds+duration) withColor:[currentTrack trackColor] invertedBorder:NO withLabel:[currentTrack key]];
+                    [self drawFillFromMS:milliseconds toMS:milliseconds+duration fillColor:[currentTrack trackColor] strokeColor:[NSColor whiteColor] label:[currentEvent comment]];
+                }
+            }
 		}
 	}
 	
