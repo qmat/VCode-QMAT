@@ -214,6 +214,7 @@
         if (([theEvent clickCount] > 1))
         {
             // Edit event's comment
+            [clickResult retain];
             [[doc eventfulController] editEventComment: [clickResult clickedEvent]];
         }
         else if ([theEvent modifierFlags] & NSAlternateKeyMask)
