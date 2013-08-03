@@ -54,6 +54,9 @@
     triggerKey = [[coder decodeObjectForKey:@"ETkey"] retain];
     trackColor = [[coder decodeObjectForKey:@"ETcolor"] retain];
 	instantaneous = [coder decodeBoolForKey:@"ETinstant"];
+    
+    [events sortUsingSelector:@selector(sortComparator:)];
+    
 	return self;
 }
 
