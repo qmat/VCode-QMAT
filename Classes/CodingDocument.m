@@ -609,7 +609,8 @@ pascal Boolean MyActionFilter (MovieController mc, short action, void* params, l
 	unsigned long long duration = 0;
 	for(int i = 0; i<[recordingEvents count]; i++){
 		iteratingEvent = [recordingEvents objectAtIndex:i];
-		duration = [self playheadTime] - [iteratingEvent startTime];
+		long long duration = [self playheadTime] - [iteratingEvent startTime];
+        if (duration < 0) duration = 1;
 		[iteratingEvent setDuration: duration];
 		[self updateChangeCount:NSChangeDone];
 	}
