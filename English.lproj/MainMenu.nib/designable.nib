@@ -559,6 +559,22 @@
 							<string key="NSTitle">Annotations</string>
 							<object class="NSMutableArray" key="NSMenuItems">
 								<bool key="EncodedWithXMLCoder">YES</bool>
+								<object class="NSMenuItem" id="1043679016">
+									<reference key="NSMenu" ref="609058651"/>
+									<string key="NSTitle">Select Previous</string>
+									<string key="NSKeyEquiv">`</string>
+									<int key="NSMnemonicLoc">2147483647</int>
+									<reference key="NSOnImage" ref="404464414"/>
+									<reference key="NSMixedImage" ref="749462877"/>
+								</object>
+								<object class="NSMenuItem" id="117446900">
+									<reference key="NSMenu" ref="609058651"/>
+									<string key="NSTitle">Select Next</string>
+									<string key="NSKeyEquiv">a</string>
+									<int key="NSMnemonicLoc">2147483647</int>
+									<reference key="NSOnImage" ref="404464414"/>
+									<reference key="NSMixedImage" ref="749462877"/>
+								</object>
 								<object class="NSMenuItem" id="160942450">
 									<reference key="NSMenu" ref="609058651"/>
 									<string key="NSTitle">Consecutive Annotation</string>
@@ -605,6 +621,24 @@
 									<reference key="NSMenu" ref="609058651"/>
 									<string key="NSTitle">Laughing</string>
 									<string key="NSKeyEquiv">v</string>
+									<int key="NSMnemonicLoc">2147483647</int>
+									<reference key="NSOnImage" ref="404464414"/>
+									<reference key="NSMixedImage" ref="749462877"/>
+								</object>
+								<object class="NSMenuItem" id="675179461">
+									<reference key="NSMenu" ref="609058651"/>
+									<bool key="NSIsDisabled">YES</bool>
+									<bool key="NSIsSeparator">YES</bool>
+									<string key="NSTitle"/>
+									<string key="NSKeyEquiv"/>
+									<int key="NSMnemonicLoc">2147483647</int>
+									<reference key="NSOnImage" ref="404464414"/>
+									<reference key="NSMixedImage" ref="749462877"/>
+								</object>
+								<object class="NSMenuItem" id="893487086">
+									<reference key="NSMenu" ref="609058651"/>
+									<string key="NSTitle">Rewind</string>
+									<string key="NSKeyEquiv">f</string>
 									<int key="NSMnemonicLoc">2147483647</int>
 									<reference key="NSOnImage" ref="404464414"/>
 									<reference key="NSMixedImage" ref="749462877"/>
@@ -920,6 +954,15 @@
 			<object class="NSCustomObject" id="889660818">
 				<string key="NSClassName">KappaController</string>
 			</object>
+			<object class="NSMenuItem" id="524649820">
+				<bool key="NSIsDisabled">YES</bool>
+				<bool key="NSIsSeparator">YES</bool>
+				<string key="NSTitle"/>
+				<string key="NSKeyEquiv"/>
+				<int key="NSMnemonicLoc">2147483647</int>
+				<reference key="NSOnImage" ref="404464414"/>
+				<reference key="NSMixedImage" ref="749462877"/>
+			</object>
 		</object>
 		<object class="IBObjectContainer" key="IBDocument.Objects">
 			<object class="NSMutableArray" key="connectionRecords">
@@ -1214,35 +1257,59 @@
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBActionConnection" key="connection">
-						<string key="label">tbzSetConsecutiveEventComment:</string>
+						<string key="label">tbzSetActiveEventComment:</string>
 						<reference key="source" ref="757895291"/>
 						<reference key="destination" ref="893332939"/>
 					</object>
-					<int key="connectionID">522</int>
+					<int key="connectionID">536</int>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBActionConnection" key="connection">
-						<string key="label">tbzSetConsecutiveEventComment:</string>
+						<string key="label">tbzSetActiveEventComment:</string>
 						<reference key="source" ref="757895291"/>
 						<reference key="destination" ref="1017494555"/>
 					</object>
-					<int key="connectionID">523</int>
+					<int key="connectionID">537</int>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBActionConnection" key="connection">
-						<string key="label">tbzSetConsecutiveEventComment:</string>
+						<string key="label">tbzSetActiveEventComment:</string>
 						<reference key="source" ref="757895291"/>
 						<reference key="destination" ref="788728174"/>
 					</object>
-					<int key="connectionID">524</int>
+					<int key="connectionID">538</int>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBActionConnection" key="connection">
-						<string key="label">tbzSetConsecutiveEventComment:</string>
+						<string key="label">tbzSetActiveEventComment:</string>
 						<reference key="source" ref="757895291"/>
 						<reference key="destination" ref="299227647"/>
 					</object>
-					<int key="connectionID">525</int>
+					<int key="connectionID">539</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBActionConnection" key="connection">
+						<string key="label">tbzRewind:</string>
+						<reference key="source" ref="757895291"/>
+						<reference key="destination" ref="893487086"/>
+					</object>
+					<int key="connectionID">540</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBActionConnection" key="connection">
+						<string key="label">tbzMakeSubsequentEventActive:</string>
+						<reference key="source" ref="757895291"/>
+						<reference key="destination" ref="117446900"/>
+					</object>
+					<int key="connectionID">541</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBActionConnection" key="connection">
+						<string key="label">tbzMakePreviousEventActive:</string>
+						<reference key="source" ref="757895291"/>
+						<reference key="destination" ref="1043679016"/>
+					</object>
+					<int key="connectionID">542</int>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBActionConnection" key="connection">
@@ -1935,11 +2002,15 @@
 						<object class="NSMutableArray" key="children">
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<reference ref="160942450"/>
-							<reference ref="59543535"/>
 							<reference ref="893332939"/>
 							<reference ref="1017494555"/>
 							<reference ref="788728174"/>
 							<reference ref="299227647"/>
+							<reference ref="1043679016"/>
+							<reference ref="59543535"/>
+							<reference ref="117446900"/>
+							<reference ref="675179461"/>
+							<reference ref="893487086"/>
 						</object>
 						<reference key="parent" ref="101945641"/>
 					</object>
@@ -1971,6 +2042,31 @@
 					<object class="IBObjectRecord">
 						<int key="objectID">519</int>
 						<reference key="object" ref="299227647"/>
+						<reference key="parent" ref="609058651"/>
+					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">526</int>
+						<reference key="object" ref="1043679016"/>
+						<reference key="parent" ref="609058651"/>
+					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">529</int>
+						<reference key="object" ref="117446900"/>
+						<reference key="parent" ref="609058651"/>
+					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">531</int>
+						<reference key="object" ref="524649820"/>
+						<reference key="parent" ref="0"/>
+					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">532</int>
+						<reference key="object" ref="675179461"/>
+						<reference key="parent" ref="609058651"/>
+					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">533</int>
+						<reference key="object" ref="893487086"/>
 						<reference key="parent" ref="609058651"/>
 					</object>
 				</object>
@@ -2064,6 +2160,11 @@
 					<string>517.IBPluginDependency</string>
 					<string>518.IBPluginDependency</string>
 					<string>519.IBPluginDependency</string>
+					<string>526.IBPluginDependency</string>
+					<string>529.IBPluginDependency</string>
+					<string>531.IBPluginDependency</string>
+					<string>532.IBPluginDependency</string>
+					<string>533.IBPluginDependency</string>
 					<string>56.IBPluginDependency</string>
 					<string>57.IBPluginDependency</string>
 					<string>58.IBPluginDependency</string>
@@ -2176,6 +2277,11 @@
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 				</object>
 			</object>
 			<object class="NSMutableDictionary" key="unlocalizedProperties">
@@ -2190,7 +2296,7 @@
 				<reference key="dict.values" ref="0"/>
 			</object>
 			<nil key="sourceID"/>
-			<int key="maxID">525</int>
+			<int key="maxID">542</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<object class="NSMutableArray" key="referencedPartialClassDescriptions">
@@ -2376,11 +2482,17 @@
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<string>exportEventTextFile:</string>
 							<string>tbzAddConsecutiveEventNow:</string>
-							<string>tbzSetConsecutiveEventComment:</string>
+							<string>tbzMakePreviousEventActive:</string>
+							<string>tbzMakeSubsequentEventActive:</string>
+							<string>tbzRewind:</string>
+							<string>tbzSetActiveEventComment:</string>
 							<string>toggleAdminWindow:</string>
 						</object>
 						<object class="NSArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
+							<string>id</string>
+							<string>id</string>
+							<string>id</string>
 							<string>id</string>
 							<string>id</string>
 							<string>id</string>
@@ -2393,7 +2505,10 @@
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<string>exportEventTextFile:</string>
 							<string>tbzAddConsecutiveEventNow:</string>
-							<string>tbzSetConsecutiveEventComment:</string>
+							<string>tbzMakePreviousEventActive:</string>
+							<string>tbzMakeSubsequentEventActive:</string>
+							<string>tbzRewind:</string>
+							<string>tbzSetActiveEventComment:</string>
 							<string>toggleAdminWindow:</string>
 						</object>
 						<object class="NSArray" key="dict.values">
@@ -2407,7 +2522,19 @@
 								<string key="candidateClassName">id</string>
 							</object>
 							<object class="IBActionInfo">
-								<string key="name">tbzSetConsecutiveEventComment:</string>
+								<string key="name">tbzMakePreviousEventActive:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">tbzMakeSubsequentEventActive:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">tbzRewind:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">tbzSetActiveEventComment:</string>
 								<string key="candidateClassName">id</string>
 							</object>
 							<object class="IBActionInfo">
@@ -2602,6 +2729,7 @@
 						<bool key="EncodedWithXMLCoder">YES</bool>
 						<object class="NSArray" key="dict.sortedKeys">
 							<bool key="EncodedWithXMLCoder">YES</bool>
+							<string>addConsecutiveEventNow:</string>
 							<string>addEventNow:</string>
 							<string>addEventNowWithComment:</string>
 							<string>doneCommenting:</string>
@@ -2609,6 +2737,7 @@
 						</object>
 						<object class="NSArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
+							<string>id</string>
 							<string>id</string>
 							<string>id</string>
 							<string>id</string>
@@ -2619,6 +2748,7 @@
 						<bool key="EncodedWithXMLCoder">YES</bool>
 						<object class="NSArray" key="dict.sortedKeys">
 							<bool key="EncodedWithXMLCoder">YES</bool>
+							<string>addConsecutiveEventNow:</string>
 							<string>addEventNow:</string>
 							<string>addEventNowWithComment:</string>
 							<string>doneCommenting:</string>
@@ -2626,6 +2756,10 @@
 						</object>
 						<object class="NSArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
+							<object class="IBActionInfo">
+								<string key="name">addConsecutiveEventNow:</string>
+								<string key="candidateClassName">id</string>
+							</object>
 							<object class="IBActionInfo">
 								<string key="name">addEventNow:</string>
 								<string key="candidateClassName">id</string>

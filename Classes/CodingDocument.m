@@ -618,15 +618,30 @@ pascal Boolean MyActionFilter (MovieController mc, short action, void* params, l
 
 - (IBAction) tbzAddConsecutiveEventNow:(id)sender
 {
-    [myController tbzAddConsecutiveEventNow];
+    [myController addConsecutiveEventNow:sender];
 }
 
-- (IBAction) tbzSetConsecutiveEventComment:(id)sender
+- (IBAction) tbzSetActiveEventComment:(id)sender
 {
-    [myController tbzSetConsecutiveEventComment:[sender title]];
+    [myController setActiveEventComment:[sender title]];
 }
 
+- (IBAction) tbzMakePreviousEventActive:(id)sender
+{
+    EventTrack* track = [myController trackContainingEvent:[myController activeEvent]];
+    [myController setActiveEvent:[track eventPreviousToEvent:[myController activeEvent]]];
+}
 
+- (IBAction) tbzMakeSubsequentEventActive:(id)sender
+{
+    EventTrack* track = [myController trackContainingEvent:[myController activeEvent]];
+    [myController setActiveEvent:[track eventSubsequentToEvent:[myController activeEvent]]];
+}
+
+- (IBAction) tbzRewind:(id)sender
+{
+    [playbackController skipBackward:sender];
+}
 
 - (void)addEventTrack:(EventTrack *)evtTrk{
 	[eventTracks addObject:evtTrk];

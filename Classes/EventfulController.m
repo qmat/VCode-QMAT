@@ -64,17 +64,20 @@
 
 
 - (IBAction) addEventNow:(id)sender{
-	tbzActiveTrack = [[doc eventTracks] objectAtIndex:([sender tag]-1)];
-	[self addEventToTrack:tbzActiveTrack];
+    if ([[doc eventTracks] count] == 0) return;
+    
+    trackIndex = [sender respondsToSelector:@selector(tag)] ? [sender tag] - 1 : 0;
+	[self setActiveTrack: [[doc eventTracks] objectAtIndex:trackIndex]];
+	[self addEventToTrack:activeTrack];
 	
 	[indexCustomView setNeedsDisplay:YES];
 	[timelineController updateTimeline];
 }
 
 - (IBAction) addEventNowWithComment:(id)sender{
-	int trackArrayIndex;
-	//verify it is a valid track
-	//
+
+    trackIndex = [sender respondsToSelector:@selector(tag)] ? (0-[sender tag])-1 : 0; //negative because tag was inverted
+    
 	//Display dialog for adding comment, pause movie, etc
 	
 	[commentField setStringValue:@""];
@@ -83,9 +86,6 @@
 	
 	//save the button click info somewhere special, perhaps an instance variable. Also save "playing state".
 	
-	trackArrayIndex = (0-[sender tag])-1; //negative because tag was inverted
-
-
 	//Save data to instance vars that needs to be saved across sheet instantiation.
 	if([(QTMovie *)[doc movie] rate] > 0){
 		wasPlaying = YES;
@@ -93,34 +93,49 @@
 	}else{
 		wasPlaying = NO;
 	};
-	trackIndex = trackArrayIndex;
 	
 	return;
 }
 
-- (void) tbzAddConsecutiveEventNow
+- (IBAction) addConsecutiveEventNow:(id)sender
 {
-    if (!tbzActiveTrack) return;
-
-    unsigned long long now = [doc playheadTime];
+    if ([[doc eventTracks] count] == 0) return;
+    if (!activeTrack) activeTrack = [[doc eventTracks] objectAtIndex:0];
     
-	tbzConsecutiveEvent = [self addEventToTrack:tbzActiveTrack atTime:now];
+    unsigned long long now = [doc playheadTime];
+
+    Event* event;
+    do
+    {
+        event = [activeTrack eventAtTime:now];
+        if (!event) event = [activeTrack eventInMiddleAtTime:now];
+        if (!event) event = [activeTrack eventEndingAtTime:now];
+        
+        if (event) {
+            now = [event startTime] + [event duration];
+            now++;
+        }
+    }
+    while (event);
+    [[doc playbackController] moveTo:now];
+        
+    Event* newEvent = [self addEventToTrack:activeTrack atTime:now];
 	
     // If we got no event back, then it turned out to be the closing of a range. So create a new event now.
-    if (!tbzConsecutiveEvent)
+    if (!newEvent)
     {
-        tbzConsecutiveEvent = [self addEventToTrack:tbzActiveTrack atTime:now];
+        [self addEventToTrack:activeTrack atTime:now];
     }
     
 	[indexCustomView setNeedsDisplay:YES];
 	[timelineController updateTimeline];
 }
 
-- (void) tbzSetConsecutiveEventComment:(NSString*)comment
+- (void) setActiveEventComment:(NSString*)comment
 {
-    if (!tbzConsecutiveEvent) return;
+    if (!activeEvent) return;
     
-    [tbzConsecutiveEvent setComment:comment];
+    [activeEvent setComment:comment];
 }
 
 
@@ -128,7 +143,7 @@
 //if it was OK, do all the event stuff, if not just don't do anything
 //if movie was playing; re-play it afterwards
 - (IBAction) doneCommenting:(id)sender{
-	EventTrack *activeTrack;
+
 	//Hide the sheet
     [commentSheet orderOut:nil];
     [NSApp endSheet:commentSheet];	
@@ -136,7 +151,7 @@
 	if(editingEvent == nil){
 		if([sender tag]==NSOKButton){
 			Event *newEvent;
-			activeTrack = [[doc eventTracks] objectAtIndex:trackIndex];
+			[self setActiveTrack: [[doc eventTracks] objectAtIndex:trackIndex]];
 			newEvent = [self addEventToTrack: activeTrack];
 			
 			if([commentField stringValue] != @""){
@@ -197,30 +212,30 @@
 
 
 //returns event if it was added; otherwise returns nil.
-- (Event *) addEventToTrack:(EventTrack *)activeTrack
+- (Event *) addEventToTrack:(EventTrack *)track
 {
-    return [self addEventToTrack:activeTrack atTime:[doc playheadTime]];
+    return [self addEventToTrack:track atTime:[doc playheadTime]];
 }
 
-- (Event *) addEventToTrack:(EventTrack *)activeTrack atTime:(unsigned long long)time;
+- (Event *) addEventToTrack:(EventTrack *)track atTime:(unsigned long long)time;
 {
 	NSArray * recordingEvents;
 	Event *newEvent = Nil;
 	
-	if([activeTrack eventAtTime:time] == nil){
+	if([track eventAtTime:time] == nil){
 	
 		//Check if there is an event in activeTrack
 		
-		if(![activeTrack instantaneousMode]){  //IS a ranged track
+		if(![track instantaneousMode]){  //IS a ranged track
 			recordingEvents = [doc recordingEvents];
-			if(![self array:recordingEvents containsEventOnTrack:activeTrack]){//This should check if there is no recording event on this track...
+			if(![self array:recordingEvents containsEventOnTrack:track]){//This should check if there is no recording event on this track...
 				//create new event and start recording
 				newEvent = [[Event alloc] initInstantEventAtTime:time];
 				[doc addRecordingEvent:newEvent];
-				[activeTrack addEvent:newEvent];
+				[track addEvent:newEvent];
 			}else{
 				for(int i=0; i<[recordingEvents count]; i++){
-					if( [[activeTrack eventList] containsObject:[recordingEvents objectAtIndex:i]]){
+					if( [[track eventList] containsObject:[recordingEvents objectAtIndex:i]]){
 						[doc removeRecordingEvent:[recordingEvents objectAtIndex:i]];//Stop recording
 						break;
 					}
@@ -228,7 +243,7 @@
 			}
 		}else{//instantaneous event
 			newEvent = [[Event alloc] initInstantEventAtTime:time];
-			[activeTrack addEvent:newEvent];
+			[track addEvent:newEvent];
 		}
 		[doc updateChangeCount:NSChangeDone];
 	}else{
@@ -243,6 +258,9 @@
 		[alert release];
 		return nil;
 	}
+    
+    if (newEvent) [self setActiveEvent:newEvent];
+    
 	return newEvent;
 }
 
@@ -257,7 +275,6 @@
 
 - (void) destroyEvent:(Event *)evt{
 	
-	
 	[doc removeRecordingEvent:evt];
 	
 	for(int i=0; i<[[doc eventTracks] count]; i++){
@@ -266,12 +283,41 @@
 		}
 	}
 	
+    if (evt == activeEvent) [self setActiveEvent:nil];
+    
 	[timelineController updateTimeline];
-
 }
 
 
+- (void) setActiveEvent:(Event *)evt
+{
+    activeEvent = evt;
+}
 
+- (Event *) activeEvent
+{
+    return activeEvent;
+}
+
+- (void) setActiveTrack:(EventTrack *)eventTrack
+{
+    activeTrack = eventTrack;
+}
+
+- (EventTrack *) activeTrack
+{
+    return activeTrack;
+}
+
+- (EventTrack *) trackContainingEvent:(Event *)event
+{
+    for (EventTrack* track in [doc eventTracks])
+    {
+        if ([track containsEvent:event]) return track;
+    }
+    
+    return nil;
+}
 
 #pragma mark Admin Window Table Glue Code
 

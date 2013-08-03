@@ -14,10 +14,9 @@
 #import "ClickResult.h"
 
 
-
-
 @interface TimelineEventTrackView : NSView {
 	id doc; //CodingDocument
+    
 	NSMutableArray *myTracks;
 	float nominalTrackHeight;
 	ClickResult * clickResult;
@@ -33,10 +32,8 @@
 - (NSArray *)managedTracks;
 - (void)sortManagedTracks;
 
-- (void)drawChevronAtMS:(unsigned long long)milliseconds withColor:(NSColor*)color invertedBorder:(bool)inverted withLabel:(NSString *)label;
-- (void)drawChevronAtMS:(unsigned long long)milliseconds withColor:(NSColor*)color andRow:(int)row invertedBorder:(bool)inverted withLabel:(NSString *)label;
-- (void)drawFillFromMS:(unsigned long long)start toMS:(unsigned long long)end withColor:(NSColor*)color;
-- (void)drawFillFromMS:(unsigned long long)start toMS:(unsigned long long)end withColor:(NSColor*)color invertedBorder:(BOOL)inverted;
+- (void)drawChevronAtMS:(unsigned long long)milliseconds fillColor:(NSColor*)fillColor strokeColor:(NSColor*) strokeColor row:(int)row label:(NSString *)label;
+- (void)drawFillFromMS:(unsigned long long)start toMS:(unsigned long long)end fillColor:(NSColor*)fillColor strokeColor:(NSColor*)strokeColor label:(NSString*)label;
 
 - (void)drawPlayHead;
 - (ClickResult *)eventAtX:(float)x y:(float)y;

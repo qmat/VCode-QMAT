@@ -34,6 +34,7 @@
 - (Event *) eventInMiddleAtTime:(unsigned long long)time;
 - (Event *) eventPreviousToEvent:(Event *)event;
 - (Event *) eventSubsequentToEvent:(Event *)event;
+- (BOOL) containsEvent:(Event *)event;
 
 - (NSArray *) eventList;
 

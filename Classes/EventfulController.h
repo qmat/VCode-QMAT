@@ -36,24 +36,29 @@
 	//This is for the color admin table
 	int colorRow;        // the row color changes apply to
     
-    EventTrack *tbzActiveTrack;
-    Event *tbzConsecutiveEvent;
+    EventTrack *activeTrack;
+    Event *activeEvent;
 }
 
 - (IBAction) addEventNow:(id)sender;
+- (IBAction) addConsecutiveEventNow:(id)sender;
 - (IBAction) addEventNowWithComment:(id)sender;
 - (IBAction) doneCommenting:(id)sender;
 - (IBAction) insertSpecialChar:(id)sender;
 
-- (void) tbzAddConsecutiveEventNow;
-- (void) tbzSetConsecutiveEventComment:(NSString*)comment;
-
+- (void) setActiveEventComment:(NSString*)comment;
 
 - (Event *) addEventToTrack:(EventTrack *)activeTrack;
 
 
 - (void) destroyEvent:(Event *)evt;
 - (void) editEventComment:(Event *)evt;
+
+- (void) setActiveEvent:(Event *)evt;
+- (Event *) activeEvent;
+- (void) setActiveTrack:(EventTrack *)eventTrack;
+- (EventTrack *) activeTrack;
+- (EventTrack *) trackContainingEvent:(Event *)event;
 
 //silly helper stuff
 -(BOOL) array:(NSArray *)array containsEventOnTrack:(EventTrack *)aTrack;

@@ -41,15 +41,29 @@
 	[[NSColor colorWithDeviceWhite:0.75 alpha:1] set];
 	[NSBezierPath fillRect:dirtyRect];
 
-
+    
 	Event * currentEvent;
 	EventTrack * currentTrack;
 	unsigned long long milliseconds;
 	unsigned long long duration;
-	bool hasComment = NO;
+    NSColor * strokeColor;
 	
+    Event * activeEvent = [[doc eventfulController] activeEvent];
+    EventTrack *activeTrack = [[doc eventfulController] activeTrack];
+    
 	for(int i = 0; i<[myTracks count];i++){
 		currentTrack = [myTracks objectAtIndex:i];
+        
+        if (currentTrack == activeTrack)
+        {
+            [[currentTrack trackColor] setStroke];
+            NSBezierPath* strokePath = [NSBezierPath bezierPath];
+            [strokePath moveToPoint:NSMakePoint(NSMinX(dirtyRect), NSMinY(dirtyRect))];
+            [strokePath lineToPoint:NSMakePoint(NSMaxX(dirtyRect), NSMinY(dirtyRect))];
+            [strokePath moveToPoint:NSMakePoint(NSMinX(dirtyRect), NSMaxY(dirtyRect))];
+            [strokePath lineToPoint:NSMakePoint(NSMaxX(dirtyRect), NSMaxY(dirtyRect))];
+            [strokePath stroke];
+        }
 
 		NSArray * currentEventArray = [currentTrack eventList];
 		int eventCount = [currentEventArray count];
@@ -57,32 +71,25 @@
 			currentEvent = [currentEventArray objectAtIndex:j];
 			milliseconds = [currentEvent startTime];
 			duration = [currentEvent duration];
+            if (currentEvent == activeEvent)                strokeColor = [NSColor blackColor];
+            else if ([[currentEvent comment] length] > 0)   strokeColor = [NSColor whiteColor];
+            else                                            strokeColor = [NSColor grayColor];
             
             // Only draw if we're in the dirty rect
             if (NSIntersectsRect(NSMakeRect([self millisecondsToX:milliseconds], 0, [self millisecondsToX:duration], [self bounds].size.height), dirtyRect))
             {
-                [self drawChevronAtMS:milliseconds withColor:[currentTrack trackColor] andRow:([myTracks count] -i -1) invertedBorder:hasComment withLabel:[currentTrack key]];
+                [self drawChevronAtMS:milliseconds fillColor:[currentTrack trackColor] strokeColor:strokeColor row:([myTracks count] -i -1) label:[currentTrack key]];
                 
                 //if the track is !instantaneous AND event duration >0 then 
                 if((![currentTrack instantaneousMode]) && (duration > 0)){
-                    [self drawChevronAtMS:(milliseconds+duration) withColor:[currentTrack trackColor] invertedBorder:NO withLabel:[currentTrack key]];
-                    [self drawFillFromMS:milliseconds toMS:milliseconds+duration fillColor:[currentTrack trackColor] strokeColor:[NSColor whiteColor] label:[currentEvent comment]];
+                    [self drawChevronAtMS:(milliseconds+duration) fillColor:[currentTrack trackColor] strokeColor:strokeColor row:0 label:[currentTrack key]];
+                    [self drawFillFromMS:milliseconds toMS:milliseconds+duration fillColor:[currentTrack trackColor] strokeColor:strokeColor label:[currentEvent comment]];
                 }
             }
 		}
 	}
 	
 	[self drawPlayHead];
-}
-
-- (void)drawFillFromMS:(unsigned long long)start toMS:(unsigned long long)end withColor:(NSColor*)color
-{
-	[self drawFillFromMS:(start) toMS:(end) fillColor:color strokeColor:[NSColor whiteColor] label:nil];
-}
-
-- (void)drawFillFromMS:(unsigned long long)start toMS:(unsigned long long)end withColor:(NSColor*)color invertedBorder:(BOOL)inverted
-{
-    [self drawFillFromMS:start toMS:end fillColor:color strokeColor:inverted ? [NSColor blackColor] : [NSColor whiteColor] label:nil];
 }
 
 - (void)drawFillFromMS:(unsigned long long)start toMS:(unsigned long long)end fillColor:(NSColor*)fillColor strokeColor:(NSColor*)strokeColor label:(NSString*)label
@@ -133,24 +140,15 @@
 }
 
 
-- (void)drawChevronAtMS:(unsigned long long)milliseconds withColor:(NSColor*)color invertedBorder:(bool)inverted withLabel:(NSString *)label{
-	[self drawChevronAtMS:milliseconds withColor:color andRow:0 invertedBorder:inverted withLabel:label];
-	return;
-}
-
-- (void)drawChevronAtMS:(unsigned long long)milliseconds withColor:(NSColor*)color andRow:(int)row invertedBorder:(bool)inverted withLabel:(NSString *)label{
+- (void)drawChevronAtMS:(unsigned long long)milliseconds fillColor:(NSColor*)fillColor strokeColor:(NSColor*) strokeColor row:(int)row label:(NSString *)label{
 	float insertX = 0.0;
 	insertX = [self millisecondsToX:milliseconds];
 	float chevronHeight = nominalTrackHeight;
 	//chevronHeight = [[self superview] nominalTrackHeight];
 	
 	//draw it
-	if(!inverted){
-		[[NSColor whiteColor] setStroke];
-	}else{
-		[[NSColor blackColor] setStroke];
-	}
-	[color setFill];
+    [strokeColor setStroke];
+	[fillColor setFill];
 	NSBezierPath* thePath = [NSBezierPath bezierPath];
 	[thePath setLineWidth:1.0]; // Has no effect.
     [thePath moveToPoint:NSMakePoint((float)insertX,((chevronHeight/4.0)*row))];
@@ -163,7 +161,7 @@
     [thePath stroke];
 	
 	NSColor * textColor;
-	if([color brightnessComponent] > 0.66){
+	if([fillColor brightnessComponent] > 0.66){
 		textColor= [NSColor blackColor];
 	}else{
 		textColor= [NSColor whiteColor];
@@ -200,14 +198,16 @@
 	NSPoint curPoint = [self convertPoint:[theEvent locationInWindow] fromView:nil];
 	clickResult = [self eventAtX:(curPoint.x) y:(curPoint.y)];
 	
+    [[doc eventfulController] setActiveTrack:[myTracks objectAtIndex:0]];
+    
     if(clickResult == nil)
     {
-		// jump to this time.
-		[[doc playbackController] moveToPercent:((float)(curPoint.x) / (float)[self bounds].size.width)];
-        
-        currentOffset = curPoint.x;
-        currentTailOffset = 0;
-        playHeadTime = [doc playheadTime];
+//		// jump to this time.
+//		[[doc playbackController] moveToPercent:((float)(curPoint.x) / (float)[self bounds].size.width)];
+//        
+//        currentOffset = curPoint.x;
+//        currentTailOffset = 0;
+//        playHeadTime = [doc playheadTime];
 	}
     else
     {
@@ -228,6 +228,9 @@
             currentOffset = curPoint.x - [self millisecondsToX:[[clickResult clickedEvent] startTime]];
             currentTailOffset = curPoint.x - [self millisecondsToX:([[clickResult clickedEvent] startTime] + [[clickResult clickedEvent] duration])];
             [clickResult retain];
+            
+            [[doc eventfulController] setActiveEvent: [clickResult clickedEvent]];
+            [self setNeedsDisplay:YES];
         }
     }
 }
@@ -388,6 +391,7 @@
 				if(relativeYFromEventOrigin>=relativeXFromEventOrigin)
                 {
                     EventTrack* eventTrack = [[self managedTracks] objectAtIndex:trackIndex];
+                    [[doc eventfulController] setActiveTrack:eventTrack];
 					return [[[ClickResult alloc] initWithEvent:event atPart:EVENTTAIL withPrevious:[eventTrack eventPreviousToEvent:event] andNext:[eventTrack eventSubsequentToEvent:event]] autorelease];
 				}
 				
@@ -403,6 +407,7 @@
 				  )
                 {
                     EventTrack* eventTrack = [[self managedTracks] objectAtIndex:trackIndex];
+                    [[doc eventfulController] setActiveTrack:eventTrack];
 					return [[[ClickResult alloc] initWithEvent:event atPart:EVENTINTERIM withPrevious:[eventTrack eventPreviousToEvent:event] andNext:[eventTrack eventSubsequentToEvent:event]] autorelease];
 				}
 			}
@@ -417,6 +422,7 @@
 			
 			if(relativeYFromEventOrigin>=relativeXFromEventOrigin){
                 EventTrack* eventTrack = [[self managedTracks] objectAtIndex:trackIndex];
+                [[doc eventfulController] setActiveTrack:eventTrack];
 				return [[[ClickResult alloc] initWithEvent:event atPart:EVENTHEAD withPrevious:[eventTrack eventPreviousToEvent:event] andNext:[eventTrack eventSubsequentToEvent:event]] autorelease];
 			}
 		}

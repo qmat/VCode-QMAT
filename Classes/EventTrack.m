@@ -199,6 +199,11 @@
 }
 
 
+- (BOOL) containsEvent:(Event *)event
+{
+    return [events containsObject:event];
+}
+
 //returns copy of events array
 //How do we handle memory management with this nsarray?
 - (NSArray *) eventList{

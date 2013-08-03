@@ -56,7 +56,10 @@
 -(IBAction) exportEventTextFile:(id)sender;
 
 - (IBAction) tbzAddConsecutiveEventNow:(id)sender;
-- (IBAction) tbzSetConsecutiveEventComment:(id)sender;
+- (IBAction) tbzSetActiveEventComment:(id)sender;
+- (IBAction) tbzMakePreviousEventActive:(id)sender;
+- (IBAction) tbzMakeSubsequentEventActive:(id)sender;
+- (IBAction) tbzRewind:(id)sender;
 
 - (NSString *) representedFilename;
 
