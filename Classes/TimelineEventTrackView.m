@@ -251,10 +251,10 @@
         switch ([clickResult clickedPart]) {
             case EVENTHEAD:
                 leftBound = [[clickResult prevEvent] startTime] + [[clickResult prevEvent] duration];
-                if (headTime < leftBound) return;
+                if (headTime < leftBound) headTime = leftBound;;
                 
                 rightBound = ranged ? [thisEvent startTime] + [thisEvent duration] : [[clickResult nextEvent] startTime];
-                if (headTime >= rightBound && rightBound != 0) return;
+                if (headTime >= rightBound && rightBound != 0) headTime = rightBound - [thisEvent duration];
                 
                 if (ranged)
                 {
@@ -268,10 +268,10 @@
                 
             case EVENTINTERIM:
                 leftBound = [[clickResult prevEvent] startTime] + [[clickResult prevEvent] duration];
-                if (headTime < leftBound) return;
+                if (headTime < leftBound) headTime = leftBound;
                 
                 rightBound = [[clickResult nextEvent] startTime];
-                if (tailTime >= rightBound && rightBound > 0) return;
+                if (tailTime >= rightBound && rightBound > 0) headTime = rightBound - [thisEvent duration];
                 
                 [thisEvent setStartTime:headTime];
                 
@@ -279,10 +279,10 @@
                 
             case EVENTTAIL:
                 leftBound = [thisEvent startTime] + 1;
-                if (tailTime < leftBound) return;
+                if (tailTime < leftBound) tailTime = leftBound;
                 
                 rightBound = [[clickResult nextEvent] startTime];
-                if (tailTime >= rightBound && rightBound != 0) return;
+                if (tailTime >= rightBound && rightBound != 0) tailTime = rightBound;
                 
                 difference = tailTime - [thisEvent startTime];
 				[thisEvent setDuration:difference];
