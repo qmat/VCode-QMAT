@@ -84,7 +84,7 @@
 {
 	[events insertObject:evt atIndex:[events count]];
     
-    [events sortedArrayUsingSelector:@selector(sortComparator:)];
+    [events sortUsingSelector:@selector(sortComparator:)];
     
 	[[self undoManager] registerUndoWithTarget:self selector:@selector(removeEvent:) object:evt];
 	[[self undoManager] setActionName:@"Mark"];
