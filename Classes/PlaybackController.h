@@ -27,5 +27,6 @@
 - (void) moveTo:(unsigned long long)milliseconds;
 - (void) skipToNextEvent;
 - (void) skipToPreviousEvent;
+- (void) jklRate:(bool)stepUp;
 
 @end

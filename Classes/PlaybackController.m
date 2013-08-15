@@ -25,6 +25,7 @@
 	}
 
 }
+
 - (IBAction) skipAnInterval:(id)sender{
 	if([doc movie]){
 		QTTime currentTime = [(QTMovie *)[doc movie] currentTime];
@@ -179,6 +180,30 @@
 			[(QTMovie *)[doc movie] setCurrentTime:newTime];
 		}
 	}
+}
+
+- (void) jklRate:(bool)stepUp
+{
+    NSArray* rateSteps = @[@-10, @-4, @-2, @-1, @-0.5, @0, @0.5, @1, @2, @4, @10];
+    
+    float currentRate = [(QTMovie *)[doc movie] rate];
+    
+    NSUInteger currentRateIndex = [rateSteps indexOfObject:[NSNumber numberWithFloat:currentRate]];
+    
+    if (currentRateIndex == NSNotFound) currentRateIndex = 0;
+    
+    if (stepUp)
+    {
+        if (currentRateIndex == [rateSteps count] -1) return;
+        
+        [(QTMovie *)[doc movie] setRate:[[rateSteps objectAtIndex:currentRateIndex + 1] floatValue]];
+    }
+    else
+    {
+        if (currentRateIndex == 0) return;
+        
+        [(QTMovie *)[doc movie] setRate:[[rateSteps objectAtIndex:currentRateIndex - 1] floatValue]];
+    }
 }
 
 @end

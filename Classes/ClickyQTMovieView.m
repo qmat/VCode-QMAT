@@ -41,6 +41,26 @@
 				[super keyDown:theEvent];
 			}
 		}
+    }else if ([@[@"j", @"k", @"l"] containsObject:[theEvent charactersIgnoringModifiers]]) {
+        if([theEvent isARepeat]==NO)
+        {
+            NSDocumentController *documentController;
+            documentController = [NSDocumentController sharedDocumentController];
+            CodingDocument *codeDocument;
+            codeDocument = [documentController documentForWindow: [self window]];
+            if ([[theEvent charactersIgnoringModifiers] isEqualTo:@"j"])
+            {
+                [[codeDocument playbackController] jklRate:false];
+            }
+            else if ([[theEvent charactersIgnoringModifiers] isEqualTo:@"k"])
+            {
+                [super pause:nil];
+            }
+            else if ([[theEvent charactersIgnoringModifiers] isEqualTo:@"l"])
+            {
+                [[codeDocument playbackController] jklRate:true];
+            }
+        }
 	}else if ([[theEvent charactersIgnoringModifiers] characterAtIndex:0] == NSLeftArrowFunctionKey) {
 		NSDocumentController *documentController;
 		documentController = [NSDocumentController sharedDocumentController];
