@@ -13,7 +13,9 @@
 
 
 @interface ClickyQTMovieView : QTMovieView {
-
+    NSArray*    rateSteps;
+    NSUInteger  rateIndex;
+    NSUInteger  rateIndexForPause;
 }
 
 @end

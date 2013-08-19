@@ -38,7 +38,8 @@
 					[[codeDocument playbackController] skipAnInterval:nil];
 				}
 			}else{
-				[super keyDown:theEvent];
+				if ([[self movie] rate] == 0) [self play:nil];
+                else [self pause:nil];
 			}
 		}
     }else if ([@[@"j", @"k", @"l"] containsObject:[theEvent charactersIgnoringModifiers]]) {
@@ -50,15 +51,16 @@
             codeDocument = [documentController documentForWindow: [self window]];
             if ([[theEvent charactersIgnoringModifiers] isEqualTo:@"j"])
             {
-                [[codeDocument playbackController] jklRate:false];
+                [self jklRate:false];
             }
             else if ([[theEvent charactersIgnoringModifiers] isEqualTo:@"k"])
             {
-                [super pause:nil];
+                rateIndex = rateIndexForPause;
+                [self pause:nil];
             }
             else if ([[theEvent charactersIgnoringModifiers] isEqualTo:@"l"])
             {
-                [[codeDocument playbackController] jklRate:true];
+                [self jklRate:true];
             }
         }
 	}else if ([[theEvent charactersIgnoringModifiers] characterAtIndex:0] == NSLeftArrowFunctionKey) {
@@ -93,7 +95,64 @@
 	}else {
 		[super keyDown:theEvent];
 	}
-	
-	
 }
+
+- (id)initWithFrame:(NSRect)frameRect
+{
+    if (self = [super initWithFrame:frameRect])
+    {
+        rateSteps = [[NSArray alloc] initWithObjects:@-10, @-4, @-2, @-1, @-0.5, @0, @0.5, @1, @2, @4, @10, nil];
+        rateIndexForPause = [rateSteps indexOfObject:@0];
+        rateIndex = NSNotFound;
+    }
+    return self;
+}
+
+- (void) dealloc
+{
+    [rateSteps release];
+    [super dealloc];
+}
+
+- (IBAction)play:(id)sender
+{
+    // resume previous rateStep unless that is pause itself, in which case reset to normal speed
+    if (rateIndex == rateIndexForPause) rateIndex = [rateSteps indexOfObject:@1];
+    
+    [[self movie] setRate:[[rateSteps objectAtIndex:rateIndex] floatValue]];
+}
+
+- (IBAction)pause:(id)sender
+{
+    // don't set rateIndex to pause here, as for play/pause we want to flip between paused and rateStep speed.
+    
+    [[self movie] setRate:0];
+}
+
+- (void) jklRate:(bool)stepUp
+{
+    if (rateIndex == NSNotFound) rateIndex = [rateSteps indexOfObject:[NSNumber numberWithFloat:[[self movie] rate]]];
+    if (rateIndex == NSNotFound) rateIndex = stepUp ? [rateSteps indexOfObject:@1] : [rateSteps indexOfObject:@-1];
+    
+    // if movie is paused, first press resumes play at previous rateStep
+    // if rateStep is at pause, always act on it
+    if ([[self movie] rate] != 0 || rateIndex == rateIndexForPause)
+    {
+        if (stepUp)
+        {
+            if (rateIndex == [rateSteps count] -1) return;
+            if (rateIndex == rateIndexForPause) rateIndex = [rateSteps indexOfObject:@1];
+            else rateIndex++;
+        }
+        else
+        {
+            if (rateIndex == 0) return;
+            if (rateIndex == rateIndexForPause) rateIndex = [rateSteps indexOfObject:@-1];
+            else rateIndex--;
+        }
+    }
+    
+    [[self movie] setRate:[[rateSteps objectAtIndex:rateIndex] floatValue]];
+}
+
 @end
